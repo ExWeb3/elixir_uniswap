@@ -8,12 +8,14 @@ defmodule Uniswap.Utils do
   @doc """
   Converts a price to it's corresponding tick
 
+  Price is how much token0 is for 1 token1 
+
   ## Examples
 
-  iex> Uniswap.Utils.price_to_tick(1813.5245551669193, 10, 6, 18)
+  iex> Uniswap.Utils.price_to_tick(1813.52, 10, 6, 18)
   201290
 
-  iex> Uniswap.Utils.price_to_tick(1474.4, 10, 6, 18)
+  iex> Uniswap.Utils.price_to_tick(1474.44, 10, 6, 18)
   203360
   """
   def price_to_tick(price, tick_spacing, token0_decimals \\ 18, token1_decimals \\ 18) do
@@ -25,6 +27,8 @@ defmodule Uniswap.Utils do
 
   @doc """
   Converts a tick to it's corresponding price
+
+  Price is how much token0 is for 1 token1 
 
   ## Examples
 
