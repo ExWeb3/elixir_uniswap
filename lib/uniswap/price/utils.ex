@@ -75,8 +75,16 @@ defmodule Uniswap.Price.Utils do
   1984403731948787316926650586759168
   """
   def to_sqrt_x96(price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
-    (:math.sqrt(price * :math.pow(10, abs(token_0_decimals - token_1_decimals))) *
-       :math.pow(2, 96))
+    to_sqrt_xnn(96, price, token_0_decimals, token_1_decimals)
+  end
+
+  def to_sqrt_x128(price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
+    to_sqrt_xnn(128, price, token_0_decimals, token_1_decimals)
+  end
+
+  def to_sqrt_xnn(nn, price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
+    (:math.sqrt(price * :math.pow(10, token_1_decimals - token_0_decimals)) *
+       :math.pow(2, nn))
     |> trunc
   end
 
@@ -92,7 +100,15 @@ defmodule Uniswap.Price.Utils do
   6.273370000000002e-4
   """
   def from_sqrt_x96(sqrt_x96_price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
-    :math.pow(sqrt_x96_price / :math.pow(2, 96), 2) /
-      :math.pow(10, abs(token_0_decimals - token_1_decimals))
+    from_sqrt_xnn(96, sqrt_x96_price, token_0_decimals, token_1_decimals)
+  end
+
+  def from_sqrt_x128(sqrt_x128_price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
+    from_sqrt_xnn(128, sqrt_x128_price, token_0_decimals, token_1_decimals)
+  end
+
+  def from_sqrt_xnn(nn, sqrt_xnn_price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
+    :math.pow(sqrt_xnn_price / :math.pow(2, nn), 2) /
+      :math.pow(10, token_1_decimals - token_0_decimals)
   end
 end

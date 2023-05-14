@@ -34,8 +34,8 @@ defmodule Uniswap.Liquidity.Utils do
         decimals_1 \\ 18
       ) do
     {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrtx96(lower_price)
-    s_upper_price = sqrtx96(upper_price)
+    s_lower_price = sqrt(lower_price)
+    s_upper_price = sqrt(upper_price)
 
     do_get_liquidity_for_amount_0(amount_0, s_lower_price, s_upper_price)
     |> add_decimals(decimals_0, decimals_1)
@@ -70,8 +70,8 @@ defmodule Uniswap.Liquidity.Utils do
         decimals_1 \\ 18
       ) do
     {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrtx96(lower_price)
-    s_upper_price = sqrtx96(upper_price)
+    s_lower_price = sqrt(lower_price)
+    s_upper_price = sqrt(upper_price)
 
     do_get_liquidity_for_amount_1(amount_1, s_lower_price, s_upper_price)
     |> add_decimals(decimals_0, decimals_1)
@@ -123,9 +123,9 @@ defmodule Uniswap.Liquidity.Utils do
         decimals_1 \\ 18
       ) do
     {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_current_price = sqrtx96(current_price)
-    s_lower_price = sqrtx96(lower_price)
-    s_upper_price = sqrtx96(upper_price)
+    s_current_price = sqrt(current_price)
+    s_lower_price = sqrt(lower_price)
+    s_upper_price = sqrt(upper_price)
 
     cond do
       s_current_price <= s_lower_price ->
@@ -163,8 +163,8 @@ defmodule Uniswap.Liquidity.Utils do
           float
   def get_amount_0_for_liquidity(liquidity, price_a, price_b, decimals_0 \\ 18, decimals_1 \\ 18) do
     {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrtx96(lower_price)
-    s_upper_price = sqrtx96(upper_price)
+    s_lower_price = sqrt(lower_price)
+    s_upper_price = sqrt(upper_price)
 
     do_get_amount_0_for_liquidity(liquidity, s_lower_price, s_upper_price, decimals_0, decimals_1)
   end
@@ -187,8 +187,8 @@ defmodule Uniswap.Liquidity.Utils do
           float
   def get_amount_1_for_liquidity(liquidity, price_a, price_b, decimals_0 \\ 18, decimals_1 \\ 18) do
     {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrtx96(lower_price)
-    s_upper_price = sqrtx96(upper_price)
+    s_lower_price = sqrt(lower_price)
+    s_upper_price = sqrt(upper_price)
 
     do_get_amount_1_for_liquidity(liquidity, s_lower_price, s_upper_price, decimals_0, decimals_1)
   end
@@ -234,9 +234,9 @@ defmodule Uniswap.Liquidity.Utils do
         decimals_1 \\ 18
       ) do
     {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_current_price = sqrtx96(current_price)
-    s_lower_price = sqrtx96(lower_price)
-    s_upper_price = sqrtx96(upper_price)
+    s_current_price = sqrt(current_price)
+    s_lower_price = sqrt(lower_price)
+    s_upper_price = sqrt(upper_price)
 
     cond do
       s_current_price <= s_lower_price ->
@@ -322,7 +322,7 @@ defmodule Uniswap.Liquidity.Utils do
 
   defp sort_prices(price_a, price_b), do: {price_b, price_a}
 
-  defp sqrtx96(number) do
+  defp sqrt(number) do
     :math.sqrt(number)
   end
 end
