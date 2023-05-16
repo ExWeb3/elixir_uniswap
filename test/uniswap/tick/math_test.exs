@@ -1,6 +1,8 @@
 defmodule Uniswap.Tick.MathTest do
   use ExUnit.Case
 
+  import Bitwise
+
   alias Uniswap.Tick
 
   @sample_ticks [
@@ -68,7 +70,7 @@ defmodule Uniswap.Tick.MathTest do
   defp sqrt_ratio(tick) do
     pow(Decimal.from_float(Tick.Math.tick_base()), tick)
     |> Decimal.sqrt()
-    |> Decimal.mult(pow(Decimal.new(2), 96))
+    |> Decimal.mult(1 <<< 96)
     |> Decimal.to_integer()
   end
 

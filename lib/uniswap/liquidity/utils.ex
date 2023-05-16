@@ -7,6 +7,11 @@ defmodule Uniswap.Liquidity.Utils do
   Note that all prices in this module are presented as `token0 / token1`.
   """
 
+  import Bitwise
+
+  @fixed_point_q96_resolution 96
+  @fixed_point_q96 0x1000000000000000000000000
+
   @doc """
   Computes the amount of liquidity received for a given amount of token0 and price range
 
@@ -14,32 +19,28 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Parameters
   - amount_0: The amount of token0 being sent in.
-  - price_a: A price representing the first tick boundary.
-  - price_b: A price representing the second tick boundary.
-  - decimals_0: Decimal precision of token0. (= ERC20.decimals) Defaults to 18.
-  - decimals_1: Decimal precision of token1. (= ERC20.decimals) Defaults to 18.
+  - sqrt_ratio_a: A price representing the first tick boundary.
+  - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_0(100, 110/100, 100/110)
+  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_0(100, 83094576964003990165232822996, 75541653435528998045632568071)
+  1048
+
+  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_0(100, 75541653435528998045632568071, 83094576964003990165232822996)
   1048
   """
-  @spec get_liquidity_for_amount_0(number, number, number, non_neg_integer, non_neg_integer) ::
+  @spec get_liquidity_for_amount_0(number, number, number) ::
           non_neg_integer
   def get_liquidity_for_amount_0(
         amount_0,
-        price_a,
-        price_b,
-        decimals_0 \\ 18,
-        decimals_1 \\ 18
+        sqrt_ratio_a,
+        sqrt_ratio_b
       ) do
-    {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrt(lower_price)
-    s_upper_price = sqrt(upper_price)
+    {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
-    do_get_liquidity_for_amount_0(amount_0, s_lower_price, s_upper_price)
-    |> add_decimals(decimals_0, decimals_1)
-    |> trunc()
+    intermediate = div(lower_sqrt_ratio * upper_sqrt_ratio, @fixed_point_q96)
+    div(amount_0 * intermediate, upper_sqrt_ratio - lower_sqrt_ratio)
   end
 
   @doc """
@@ -50,32 +51,24 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Parameters
   - amount_1: The amount of token1 being sent in.
-  - price_a: A price representing the first tick boundary.
-  - price_b: A price representing the second tick boundary.
-  - decimals_0: Decimal precision of token0. (= ERC20.decimals) Defaults to 18.
-  - decimals_1: Decimal precision of token1. (= ERC20.decimals) Defaults to 18.
+  - sqrt_ratio_a: A price representing the first tick boundary.
+  - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_1(100, 110/100, 100/110)
+  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_1(100, 83094576964003990165232822996, 75541653435528998045632568071)
   1048
   """
-  @spec get_liquidity_for_amount_1(number, number, number, non_neg_integer, non_neg_integer) ::
+  @spec get_liquidity_for_amount_1(number, number, number) ::
           non_neg_integer
   def get_liquidity_for_amount_1(
         amount_1,
-        price_a,
-        price_b,
-        decimals_0 \\ 18,
-        decimals_1 \\ 18
+        sqrt_ratio_a,
+        sqrt_ratio_b
       ) do
-    {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrt(lower_price)
-    s_upper_price = sqrt(upper_price)
+    {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
-    do_get_liquidity_for_amount_1(amount_1, s_lower_price, s_upper_price)
-    |> add_decimals(decimals_0, decimals_1)
-    |> trunc()
+    div(amount_1 * @fixed_point_q96, upper_sqrt_ratio - lower_sqrt_ratio)
   end
 
   @doc """
@@ -87,21 +80,19 @@ defmodule Uniswap.Liquidity.Utils do
   ## Parameters
   - amount_0: The amount of token0 being sent in.
   - amount_1: The amount of token1 being sent in.
-  - current_price: A price representing the current pool price.
-  - price_a: A price representing the first tick boundary.
-  - price_b: A price representing the second tick boundary.
-  - decimals_0: Decimal precision of token0. (= ERC20.decimals) Defaults to 18.
-  - decimals_1: Decimal precision of token1. (= ERC20.decimals) Defaults to 18.
+  - current_sqrt_ratio: A price representing the current pool price.
+  - sqrt_ratio_a: A price representing the first tick boundary.
+  - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 1, 100/110, 110/100)
-  2148
+  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 79228162514264337593543950336, 75541653435528998045632568071, 83094576964003990165232822996)
+  2149
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 99/110, 100/110, 110/100)
+  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 75161148693683831164828610338, 75541653435528998045632568071, 83094576964003990165232822996)
   1048
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 111/100, 100/110, 110/100)
+  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 83473499738992491211565015422, 75541653435528998045632568071, 83094576964003990165232822996)
   2097
   """
   @spec get_liquidity_for_amounts(
@@ -109,40 +100,30 @@ defmodule Uniswap.Liquidity.Utils do
           number,
           number,
           number,
-          number,
-          non_neg_integer,
-          non_neg_integer
+          number
         ) :: non_neg_integer
   def get_liquidity_for_amounts(
         amount_0,
         amount_1,
-        current_price,
-        price_a,
-        price_b,
-        decimals_0 \\ 18,
-        decimals_1 \\ 18
+        current_sqrt_ratio,
+        sqrt_ratio_a,
+        sqrt_ratio_b
       ) do
-    {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_current_price = sqrt(current_price)
-    s_lower_price = sqrt(lower_price)
-    s_upper_price = sqrt(upper_price)
+    {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
     cond do
-      s_current_price <= s_lower_price ->
-        do_get_liquidity_for_amount_0(amount_0, s_lower_price, s_upper_price)
+      current_sqrt_ratio <= lower_sqrt_ratio ->
+        get_liquidity_for_amount_0(amount_0, lower_sqrt_ratio, upper_sqrt_ratio)
 
-      s_current_price < s_upper_price ->
-        liquidity_0 = do_get_liquidity_for_amount_0(amount_0, s_current_price, s_upper_price)
-        liquidity_1 = do_get_liquidity_for_amount_1(amount_1, s_lower_price, s_current_price)
+      current_sqrt_ratio < upper_sqrt_ratio ->
+        liquidity_0 = get_liquidity_for_amount_0(amount_0, current_sqrt_ratio, upper_sqrt_ratio)
+        liquidity_1 = get_liquidity_for_amount_1(amount_1, lower_sqrt_ratio, current_sqrt_ratio)
 
         min(liquidity_0, liquidity_1)
 
       true ->
-        # s_current_price >= s_upper_price
-        do_get_liquidity_for_amount_1(amount_1, s_lower_price, s_upper_price)
+        get_liquidity_for_amount_1(amount_1, lower_sqrt_ratio, upper_sqrt_ratio)
     end
-    |> add_decimals(decimals_0, decimals_1)
-    |> trunc()
   end
 
   @doc """
@@ -150,23 +131,21 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Parameters
   - liquidity: The liquidity being valued.
-  - price_a: A price representing the first tick boundary.
-  - price_b: A price representing the second tick boundary.
-  - decimals_0: Decimal precision of token0. (= ERC20.decimals) Defaults to 18.
-  - decimals_1: Decimal precision of token1. (= ERC20.decimals) Defaults to 18.
+  - sqrt_ratio_a: A price representing the first tick boundary.
+  - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
-  iex> Uniswap.Liquidity.Utils.get_amount_0_for_liquidity(1048, 100 / 110, 110 / 100)
-  99.9228793529381
+  iex> Uniswap.Liquidity.Utils.get_amount_0_for_liquidity(1048, 75541653435528998045632568071, 83094576964003990165232822996)
+  99
   """
-  @spec get_amount_0_for_liquidity(number, number, number, non_neg_integer, non_neg_integer) ::
+  @spec get_amount_0_for_liquidity(number, number, number) ::
           float
-  def get_amount_0_for_liquidity(liquidity, price_a, price_b, decimals_0 \\ 18, decimals_1 \\ 18) do
-    {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrt(lower_price)
-    s_upper_price = sqrt(upper_price)
+  def get_amount_0_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
+    {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
-    do_get_amount_0_for_liquidity(liquidity, s_lower_price, s_upper_price, decimals_0, decimals_1)
+    ((liquidity <<< @fixed_point_q96_resolution) * (upper_sqrt_ratio - lower_sqrt_ratio))
+    |> div(upper_sqrt_ratio)
+    |> div(lower_sqrt_ratio)
   end
 
   @doc """
@@ -174,23 +153,19 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Parameters
   - liquidity: The liquidity being valued.
-  - price_a: A price representing the first tick boundary.
-  - price_b: A price representing the second tick boundary.
-  - decimals_0: Decimal precision of token0. (= ERC20.decimals) Defaults to 18.
-  - decimals_1: Decimal precision of token1. (= ERC20.decimals) Defaults to 18.
+  - sqrt_ratio_a: A price representing the first tick boundary.
+  - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
-  iex> Uniswap.Liquidity.Utils.get_amount_0_for_liquidity(2097, 100 / 110, 110 / 100)
-  199.94110496480076
+  iex> Uniswap.Liquidity.Utils.get_amount_0_for_liquidity(2097, 75541653435528998045632568071, 83094576964003990165232822996)
+  199
   """
-  @spec get_amount_1_for_liquidity(number, number, number, non_neg_integer, non_neg_integer) ::
+  @spec get_amount_1_for_liquidity(number, number, number) ::
           float
-  def get_amount_1_for_liquidity(liquidity, price_a, price_b, decimals_0 \\ 18, decimals_1 \\ 18) do
-    {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_lower_price = sqrt(lower_price)
-    s_upper_price = sqrt(upper_price)
+  def get_amount_1_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
+    {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
-    do_get_amount_1_for_liquidity(liquidity, s_lower_price, s_upper_price, decimals_0, decimals_1)
+    div(liquidity * (upper_sqrt_ratio - lower_sqrt_ratio), @fixed_point_q96)
   end
 
   @doc """
@@ -201,128 +176,69 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Parameters
   - liquidity: The liquidity being valued
-  - current_price: A price representing the current pool price.
-  - price_a: A price representing the first tick boundary.
-  - price_b: A price representing the second tick boundary.
-  - decimals_0: Decimal precision of token0. (= ERC20.decimals) Defaults to 18.
-  - decimals_1: Decimal precision of token1. (= ERC20.decimals) Defaults to 18.
+  - current_sqrt_ratio: A price representing the current pool price.
+  - sqrt_ratio_a: A price representing the first tick boundary.
+  - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
-  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(2148, 1, 100/110, 110/100)
-  {99.96235830046787, 99.96235830046763}
+  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(2148, 79228162514264337593543950336, 75541653435528998045632568071, 83094576964003990165232822996)
+  {99, 99}
 
-  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(1048, 99/110, 100/110, 110/100)
-  {99.9228793529381, 0}
+  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(1048, 75161148693683831164828610338, 75541653435528998045632568071, 83094576964003990165232822996)
+  {99, 0}
 
-  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(2097, 111/100, 100/110, 110/100)
-  {0, 199.94110496480081}
+  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(2097, 83473499738992491211565015422, 75541653435528998045632568071, 83094576964003990165232822996)
+  {0, 199}
   """
   @spec get_amounts_for_liquidity(
           number,
           number,
           number,
-          number,
-          non_neg_integer,
-          non_neg_integer
+          number
         ) :: {float, float}
   def get_amounts_for_liquidity(
         liquidity,
-        current_price,
-        price_a,
-        price_b,
-        decimals_0 \\ 18,
-        decimals_1 \\ 18
+        current_sqrt_ratio,
+        sqrt_ratio_a,
+        sqrt_ratio_b
       ) do
-    {lower_price, upper_price} = sort_prices(price_a, price_b)
-    s_current_price = sqrt(current_price)
-    s_lower_price = sqrt(lower_price)
-    s_upper_price = sqrt(upper_price)
+    {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
     cond do
-      s_current_price <= s_lower_price ->
-        {do_get_amount_0_for_liquidity(
+      current_sqrt_ratio <= lower_sqrt_ratio ->
+        {get_amount_0_for_liquidity(
            liquidity,
-           s_lower_price,
-           s_upper_price,
-           decimals_0,
-           decimals_1
+           lower_sqrt_ratio,
+           upper_sqrt_ratio
          ), 0}
 
-      s_current_price < s_upper_price ->
-        {do_get_amount_0_for_liquidity(
+      current_sqrt_ratio < upper_sqrt_ratio ->
+        {get_amount_0_for_liquidity(
            liquidity,
-           s_current_price,
-           s_upper_price,
-           decimals_0,
-           decimals_1
+           current_sqrt_ratio,
+           upper_sqrt_ratio
          ),
-         do_get_amount_1_for_liquidity(
+         get_amount_1_for_liquidity(
            liquidity,
-           s_lower_price,
-           s_current_price,
-           decimals_0,
-           decimals_1
+           lower_sqrt_ratio,
+           current_sqrt_ratio
          )}
 
       true ->
-        # s_current_price >= s_upper_price
+        # current_sqrt_ratio >= upper_sqrt_ratio
         {0,
-         do_get_amount_1_for_liquidity(
+         get_amount_1_for_liquidity(
            liquidity,
-           s_lower_price,
-           s_upper_price,
-           decimals_0,
-           decimals_1
+           lower_sqrt_ratio,
+           upper_sqrt_ratio
          )}
     end
   end
 
   ## Helpers
 
-  defp do_get_amount_0_for_liquidity(
-         liquidity,
-         s_lower_price,
-         s_upper_price,
-         decimals_0,
-         decimals_1
-       ) do
-    (liquidity * (s_upper_price - s_lower_price) / (s_lower_price * s_upper_price))
-    |> remove_decimals(decimals_0, decimals_1)
-  end
-
-  defp do_get_amount_1_for_liquidity(
-         liquidity,
-         s_lower_price,
-         s_upper_price,
-         decimals_0,
-         decimals_1
-       ) do
-    (liquidity * (s_upper_price - s_lower_price))
-    |> remove_decimals(decimals_0, decimals_1)
-  end
-
-  defp do_get_liquidity_for_amount_0(amount, s_lower_price, s_upper_price) do
-    amount * s_lower_price * s_upper_price / (s_upper_price - s_lower_price)
-  end
-
-  defp do_get_liquidity_for_amount_1(amount, s_lower_price, s_upper_price) do
-    amount / (s_upper_price - s_lower_price)
-  end
-
-  defp add_decimals(value, decimals_0, decimals_1) do
-    value * :math.pow(10, abs(decimals_0 - decimals_1))
-  end
-
-  defp remove_decimals(value, decimals_0, decimals_1) do
-    value / :math.pow(10, abs(decimals_0 - decimals_1))
-  end
-
   defp sort_prices(price_a, price_b) when price_a < price_b,
     do: {price_a, price_b}
 
   defp sort_prices(price_a, price_b), do: {price_b, price_a}
-
-  defp sqrt(number) do
-    :math.sqrt(number)
-  end
 end
