@@ -22,7 +22,7 @@ defmodule Uniswap.MixProject do
   defp deps do
     [
       {:ethers, "~> 0.0.1-dev", github: "alisinabh/elixir_ethers"},
-      {:decimal, "~> 2.1"}
+      {:decimal, "~> 2.1", only: :test}
     ]
   end
 end
