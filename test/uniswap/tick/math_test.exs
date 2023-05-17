@@ -1,8 +1,7 @@
 defmodule Uniswap.Tick.MathTest do
   use ExUnit.Case
-
+  doctest Uniswap.Tick.Math
   import Bitwise
-
   alias Uniswap.Tick
 
   @sample_ticks [

@@ -61,6 +61,11 @@ defmodule Uniswap.Tick.Math do
     end
   end
 
+  @doc """
+  Calculates reverse of `get_sqrt_ratio_at_tick/1`.
+
+  *IMPORTANT*: This function is not precision safe and is using floating point calculation. Do not use in prod!
+  """
   def get_tick_at_sqrt_ratio(sqrt_ratio) do
     if sqrt_ratio >= @min_sqrt_ratio and sqrt_ratio <= @max_sqrt_ratio do
       ratio = :math.pow(sqrt_ratio / :math.pow(2, 96), 2)
@@ -72,6 +77,81 @@ defmodule Uniswap.Tick.Math do
     end
   end
 
+  @doc """
+  Returns the nearest smaller valid tick with respect to the tick spacing
+
+  ## Examples
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(53, 10)
+      50
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(59, 10)
+      50
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(90, 10)
+      90
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(-90, 10)
+      -90
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(0, 10)
+      0
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(-54, 10)
+      -60
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(22, 8)
+      16
+  """
+  def prev_valid_tick(tick, tick_spacing) do
+    r = rem(tick, tick_spacing)
+
+    cond do
+      r > 0 -> tick - r
+      r < 0 -> tick - (tick_spacing + r)
+      true -> tick
+    end
+  end
+
+  @doc """
+  Return the nearest bigger valid tick with respect to the tick spacing
+
+  ## Examples
+
+      iex> Uniswap.Tick.Math.next_valid_tick(53, 10)
+      60
+
+      iex> Uniswap.Tick.Math.next_valid_tick(59, 10)
+      60
+
+      iex> Uniswap.Tick.Math.next_valid_tick(90, 10)
+      90
+
+      iex> Uniswap.Tick.Math.next_valid_tick(-90, 10)
+      -90
+
+      iex> Uniswap.Tick.Math.next_valid_tick(0, 10)
+      0
+
+      iex> Uniswap.Tick.Math.next_valid_tick(-54, 10)
+      -50
+
+      iex> Uniswap.Tick.Math.next_valid_tick(22, 8)
+      24
+  """
+  def next_valid_tick(tick, tick_spacing) do
+    r = rem(tick, tick_spacing)
+
+    cond do
+      r > 0 -> tick + (tick_spacing - r)
+      r < 0 -> tick - r
+      true -> tick
+    end
+  end
+
+  @doc """
+  Base for tick calculatio: 1.0001
+  """
   def tick_base, do: @tick_base
 
   defp tick_step(ratio, abs_tick, comp, mul) do
