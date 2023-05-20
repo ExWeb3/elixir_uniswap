@@ -235,6 +235,36 @@ defmodule Uniswap.Liquidity.Utils do
     end
   end
 
+  @doc """
+  Returns the required amount of swap between tokens to achieve near 100% utilization in a position.
+
+  If the returned number is above 0, token_0 should be traded for token_1. For negative numbers
+  token_1 should be traded for token_0.
+
+  ## Examples
+
+  iex> Uniswap.Liquidity.Utils.get_required_swap_for_liquidity(100, 200, 112045541949572287496682733568, 79228162514264337593543950336, 137227202865029789651872776192)
+  22
+
+  iex> Uniswap.Liquidity.Utils.get_required_swap_for_liquidity(50, 200, 112045541949572287496682733568, 79228162514264337593543950336, 137227202865029789651872776192)
+  -7
+  """
+  def get_required_swap_for_liquidity(
+        amount_0,
+        amount_1,
+        current_sqrt_ratio,
+        sqrt_ratio_a,
+        sqrt_ratio_b
+      ) do
+    {r0, r1} =
+      get_amounts_for_liquidity(1_000_000_000, current_sqrt_ratio, sqrt_ratio_a, sqrt_ratio_b)
+
+    div(
+      r1 * amount_0 - r0 * amount_1,
+      div(r0 * current_sqrt_ratio * current_sqrt_ratio, @fixed_point_q96 * @fixed_point_q96) + r1
+    )
+  end
+
   ## Helpers
 
   defp sort_prices(price_a, price_b) when price_a < price_b,
