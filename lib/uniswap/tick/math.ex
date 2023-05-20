@@ -61,6 +61,14 @@ defmodule Uniswap.Tick.Math do
     end
   end
 
+  @doc "Same as `get_sqrt_ratio_at_tick/1` but raises on errors"
+  def get_sqrt_ratio_at_tick!(tick) do
+    case get_sqrt_ratio_at_tick(tick) do
+      {:ok, sqrt_price_x96} -> sqrt_price_x96
+      {:error, :invalid_tick} -> raise ArgumentError, "Invalid Tick"
+    end
+  end
+
   @doc """
   Calculates reverse of `get_sqrt_ratio_at_tick/1`.
 
@@ -74,6 +82,14 @@ defmodule Uniswap.Tick.Math do
       {:ok, trunc(tick)}
     else
       {:error, :invalid_sqrt_ratio}
+    end
+  end
+
+  @doc "Same as `get_tick_at_sqrt_ratio/1` but raises on errors"
+  def get_tick_at_sqrt_ratio!(tick) do
+    case get_tick_at_sqrt_ratio(tick) do
+      {:ok, sqrt_price_x96} -> sqrt_price_x96
+      {:error, :invalid_sqrt_ratio} -> raise ArgumentError, "Invalid Ratio"
     end
   end
 
