@@ -247,7 +247,7 @@ defmodule Uniswap.Liquidity.Utils do
   22
 
   iex> Uniswap.Liquidity.Utils.get_required_swap_for_liquidity(50, 200, 112045541949572287496682733568, 79228162514264337593543950336, 137227202865029789651872776192)
-  -7
+  -14
   """
   def get_required_swap_for_liquidity(
         amount_0,
@@ -259,10 +259,18 @@ defmodule Uniswap.Liquidity.Utils do
     {r0, r1} =
       get_amounts_for_liquidity(1_000_000_000, current_sqrt_ratio, sqrt_ratio_a, sqrt_ratio_b)
 
-    div(
-      r1 * amount_0 - r0 * amount_1,
-      div(r0 * current_sqrt_ratio * current_sqrt_ratio, @fixed_point_q96 * @fixed_point_q96) + r1
-    )
+    amount =
+      div(
+        r1 * amount_0 - r0 * amount_1,
+        div(r0 * current_sqrt_ratio * current_sqrt_ratio, @fixed_point_q96 * @fixed_point_q96) +
+          r1
+      )
+
+    if amount >= 0 do
+      amount
+    else
+      div(amount * current_sqrt_ratio * current_sqrt_ratio, @fixed_point_q96 * @fixed_point_q96)
+    end
   end
 
   ## Helpers
