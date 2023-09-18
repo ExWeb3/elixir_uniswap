@@ -21,7 +21,7 @@ defmodule Uniswap.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ethers, "~> 0.0.1-dev", github: "alisinabh/elixir_ethers"},
+      {:ethers, "~> 0.1.0-dev", github: "alisinabh/elixir_ethers"},
       {:decimal, "~> 2.1", only: :test}
     ]
   end
