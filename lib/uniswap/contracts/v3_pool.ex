@@ -17,7 +17,11 @@ defmodule Uniswap.Contracts.V3Pool do
       iex> V3Pool.position_key(-276330, -276320)
       "0x83947e3b1c37534eabbcccb7343ebdbf5390725cbe77c0d7dae7963d7d8d3a3d"
   """
-  def position_key(owner \\ NonfungiblePositionManager.default_address(), lower_tick, upper_tick) do
+  def position_key(
+        owner \\ NonfungiblePositionManager.__default_address__(),
+        lower_tick,
+        upper_tick
+      ) do
     address_bin = Ethers.Utils.hex_decode!(owner)
 
     <<address_bin::binary, lower_tick::signed-24, upper_tick::signed-24>>
