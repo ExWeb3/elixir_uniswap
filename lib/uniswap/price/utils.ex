@@ -19,7 +19,7 @@ defmodule Uniswap.Price.Utils do
   203360
   """
   def price_to_tick(price, tick_spacing, token0_decimals \\ 18, token1_decimals \\ 18) do
-    (:math.log(price / :math.pow(10, token0_decimals - token1_decimals)) /
+    (:math.log(price / 10 ** (token0_decimals - token1_decimals)) /
        :math.log(@tick_base))
     |> round()
     |> nearest_tick(tick_spacing)
@@ -39,7 +39,7 @@ defmodule Uniswap.Price.Utils do
   1 / 1474.4463585092642
   """
   def tick_to_price(price, token0_decimals \\ 18, token1_decimals \\ 18) do
-    :math.pow(@tick_base, price) * :math.pow(10, token0_decimals - token1_decimals)
+    @tick_base ** price * 10 ** (token0_decimals - token1_decimals)
   end
 
   @doc """
@@ -83,8 +83,8 @@ defmodule Uniswap.Price.Utils do
   end
 
   def to_sqrt_xnn(nn, price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
-    (:math.sqrt(price * :math.pow(10, token_1_decimals - token_0_decimals)) *
-       :math.pow(2, nn))
+    (:math.sqrt(price * 10 ** (token_1_decimals - token_0_decimals)) *
+       2 ** nn)
     |> trunc
   end
 
@@ -108,7 +108,6 @@ defmodule Uniswap.Price.Utils do
   end
 
   def from_sqrt_xnn(nn, sqrt_xnn_price, token_0_decimals \\ 18, token_1_decimals \\ 18) do
-    :math.pow(sqrt_xnn_price / :math.pow(2, nn), 2) /
-      :math.pow(10, token_1_decimals - token_0_decimals)
+    (sqrt_xnn_price / 2 ** nn) ** 2 / 10 ** (token_1_decimals - token_0_decimals)
   end
 end

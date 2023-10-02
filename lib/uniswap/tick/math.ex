@@ -76,7 +76,7 @@ defmodule Uniswap.Tick.Math do
   """
   def get_tick_at_sqrt_ratio(sqrt_ratio) do
     if sqrt_ratio >= @min_sqrt_ratio and sqrt_ratio <= @max_sqrt_ratio do
-      ratio = :math.pow(sqrt_ratio / :math.pow(2, 96), 2)
+      ratio = (sqrt_ratio / 2 ** 96) ** 2
       tick = :math.log(ratio) / :math.log(@tick_base)
 
       {:ok, trunc(tick)}
