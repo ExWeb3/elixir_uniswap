@@ -11,10 +11,9 @@ defmodule Uniswap do
         fee,
         amount_in,
         amount_out_min,
-        recipient \\ nil,
+        recipient,
         deadline \\ deadline(),
-        sqrt_price_limit_x96 \\ 0,
-        opts \\ []
+        sqrt_price_limit_x96 \\ 0
       ) do
     SwapRouter.exact_input_single({
       token_in,
@@ -26,7 +25,6 @@ defmodule Uniswap do
       amount_out_min,
       sqrt_price_limit_x96
     })
-    |> Ethers.call(opts)
   end
 
   def deadline(seconds \\ 1800) do
