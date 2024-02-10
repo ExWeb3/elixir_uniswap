@@ -21,12 +21,12 @@ defmodule Uniswap.Tick.MathTest do
     738_203
   ]
 
-  describe "get_sqrt_ratio_at_tick" do
+  describe "sqrt_ratio_at_tick" do
     test "tick is at most diff of 1/100th of a bips" do
       for tick <- @sample_ticks do
         expected_result = sqrt_ratio(tick)
 
-        {:ok, result} = Tick.Math.get_sqrt_ratio_at_tick(tick)
+        {:ok, result} = Tick.Math.sqrt_ratio_at_tick(tick)
         abs_diff = abs(result - expected_result)
         assert abs_diff / expected_result < 0.000001
       end
@@ -36,20 +36,20 @@ defmodule Uniswap.Tick.MathTest do
       min = -887_272
       max = -min
 
-      assert {:ok, _} = Tick.Math.get_sqrt_ratio_at_tick(min)
-      assert {:ok, _} = Tick.Math.get_sqrt_ratio_at_tick(max)
+      assert {:ok, _} = Tick.Math.sqrt_ratio_at_tick(min)
+      assert {:ok, _} = Tick.Math.sqrt_ratio_at_tick(max)
 
-      assert {:error, :invalid_tick} = Tick.Math.get_sqrt_ratio_at_tick(min - 1)
-      assert {:error, :invalid_tick} = Tick.Math.get_sqrt_ratio_at_tick(max + 1)
+      assert {:error, :invalid_tick} = Tick.Math.sqrt_ratio_at_tick(min - 1)
+      assert {:error, :invalid_tick} = Tick.Math.sqrt_ratio_at_tick(max + 1)
     end
   end
 
-  describe "get_tick_at_sqrt_ratio" do
+  describe "tick_at_sqrt_ratio" do
     test "correct tick for a given sqrt price" do
       for expected_tick <- @sample_ticks do
         sqrt_ratio = sqrt_ratio(expected_tick)
 
-        {:ok, tick} = Tick.Math.get_tick_at_sqrt_ratio(sqrt_ratio)
+        {:ok, tick} = Tick.Math.tick_at_sqrt_ratio(sqrt_ratio)
         assert tick === expected_tick
       end
     end
@@ -58,11 +58,11 @@ defmodule Uniswap.Tick.MathTest do
       min = 4_295_128_739
       max = 1_461_446_703_485_210_103_287_273_052_203_988_822_378_723_970_342
 
-      {:ok, _} = Tick.Math.get_tick_at_sqrt_ratio(min)
-      {:ok, _} = Tick.Math.get_tick_at_sqrt_ratio(max)
+      {:ok, _} = Tick.Math.tick_at_sqrt_ratio(min)
+      {:ok, _} = Tick.Math.tick_at_sqrt_ratio(max)
 
-      {:error, :invalid_sqrt_ratio} = Tick.Math.get_tick_at_sqrt_ratio(min - 1)
-      {:error, :invalid_sqrt_ratio} = Tick.Math.get_tick_at_sqrt_ratio(max + 1)
+      {:error, :invalid_sqrt_ratio} = Tick.Math.tick_at_sqrt_ratio(min - 1)
+      {:error, :invalid_sqrt_ratio} = Tick.Math.tick_at_sqrt_ratio(max + 1)
     end
   end
 

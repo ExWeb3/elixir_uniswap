@@ -1,8 +1,6 @@
-defmodule Uniswap.Liquidity.Utils do
+defmodule Uniswap.Liquidity.Math do
   @moduledoc """
-  Utilities for handling liquidity calculations
-
-  Provides functions for computing liquidity amounts from token amounts and prices.
+  Math functions for handling liquidity and amounts calculations
 
   Note that all prices in this module are presented as `token0 / token1`.
   """
@@ -24,15 +22,15 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Examples
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_0(100, 83094576964003990165232822996, 75541653435528998045632568071)
+  iex> Uniswap.Liquidity.Math.liquidity_for_amount_0(100, 83094576964003990165232822996, 75541653435528998045632568071)
   1048
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_0(100, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.liquidity_for_amount_0(100, 75541653435528998045632568071, 83094576964003990165232822996)
   1048
   """
-  @spec get_liquidity_for_amount_0(number, number, number) ::
+  @spec liquidity_for_amount_0(number, number, number) ::
           non_neg_integer
-  def get_liquidity_for_amount_0(
+  def liquidity_for_amount_0(
         amount_0,
         sqrt_ratio_a,
         sqrt_ratio_b
@@ -56,12 +54,12 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Examples
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amount_1(100, 83094576964003990165232822996, 75541653435528998045632568071)
+  iex> Uniswap.Liquidity.Math.liquidity_for_amount_1(100, 83094576964003990165232822996, 75541653435528998045632568071)
   1048
   """
-  @spec get_liquidity_for_amount_1(number, number, number) ::
+  @spec liquidity_for_amount_1(number, number, number) ::
           non_neg_integer
-  def get_liquidity_for_amount_1(
+  def liquidity_for_amount_1(
         amount_1,
         sqrt_ratio_a,
         sqrt_ratio_b
@@ -86,23 +84,23 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Examples
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 79228162514264337593543950336, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.liquidity_for_amounts(100, 200, 79228162514264337593543950336, 75541653435528998045632568071, 83094576964003990165232822996)
   2149
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 75161148693683831164828610338, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.liquidity_for_amounts(100, 200, 75161148693683831164828610338, 75541653435528998045632568071, 83094576964003990165232822996)
   1048
 
-  iex> Uniswap.Liquidity.Utils.get_liquidity_for_amounts(100, 200, 83473499738992491211565015422, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.liquidity_for_amounts(100, 200, 83473499738992491211565015422, 75541653435528998045632568071, 83094576964003990165232822996)
   2097
   """
-  @spec get_liquidity_for_amounts(
+  @spec liquidity_for_amounts(
           number,
           number,
           number,
           number,
           number
         ) :: non_neg_integer
-  def get_liquidity_for_amounts(
+  def liquidity_for_amounts(
         amount_0,
         amount_1,
         current_sqrt_ratio,
@@ -113,16 +111,16 @@ defmodule Uniswap.Liquidity.Utils do
 
     cond do
       current_sqrt_ratio <= lower_sqrt_ratio ->
-        get_liquidity_for_amount_0(amount_0, lower_sqrt_ratio, upper_sqrt_ratio)
+        liquidity_for_amount_0(amount_0, lower_sqrt_ratio, upper_sqrt_ratio)
 
       current_sqrt_ratio < upper_sqrt_ratio ->
-        liquidity_0 = get_liquidity_for_amount_0(amount_0, current_sqrt_ratio, upper_sqrt_ratio)
-        liquidity_1 = get_liquidity_for_amount_1(amount_1, lower_sqrt_ratio, current_sqrt_ratio)
+        liquidity_0 = liquidity_for_amount_0(amount_0, current_sqrt_ratio, upper_sqrt_ratio)
+        liquidity_1 = liquidity_for_amount_1(amount_1, lower_sqrt_ratio, current_sqrt_ratio)
 
         min(liquidity_0, liquidity_1)
 
       true ->
-        get_liquidity_for_amount_1(amount_1, lower_sqrt_ratio, upper_sqrt_ratio)
+        liquidity_for_amount_1(amount_1, lower_sqrt_ratio, upper_sqrt_ratio)
     end
   end
 
@@ -135,12 +133,12 @@ defmodule Uniswap.Liquidity.Utils do
   - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
-  iex> Uniswap.Liquidity.Utils.get_amount_0_for_liquidity(1048, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.amount_0_for_liquidity(1048, 75541653435528998045632568071, 83094576964003990165232822996)
   99
   """
-  @spec get_amount_0_for_liquidity(number, number, number) ::
+  @spec amount_0_for_liquidity(number, number, number) ::
           float
-  def get_amount_0_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
+  def amount_0_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
     {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
     ((liquidity <<< @fixed_point_q96_resolution) * (upper_sqrt_ratio - lower_sqrt_ratio))
@@ -157,12 +155,12 @@ defmodule Uniswap.Liquidity.Utils do
   - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
-  iex> Uniswap.Liquidity.Utils.get_amount_0_for_liquidity(2097, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.amount_0_for_liquidity(2097, 75541653435528998045632568071, 83094576964003990165232822996)
   199
   """
-  @spec get_amount_1_for_liquidity(number, number, number) ::
+  @spec amount_1_for_liquidity(number, number, number) ::
           float
-  def get_amount_1_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
+  def amount_1_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
     {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
     div(liquidity * (upper_sqrt_ratio - lower_sqrt_ratio), @fixed_point_q96)
@@ -181,22 +179,22 @@ defmodule Uniswap.Liquidity.Utils do
   - sqrt_ratio_b: A price representing the second tick boundary.
 
   ## Examples
-  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(2148, 79228162514264337593543950336, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.amounts_for_liquidity(2148, 79228162514264337593543950336, 75541653435528998045632568071, 83094576964003990165232822996)
   {99, 99}
 
-  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(1048, 75161148693683831164828610338, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.amounts_for_liquidity(1048, 75161148693683831164828610338, 75541653435528998045632568071, 83094576964003990165232822996)
   {99, 0}
 
-  iex> Uniswap.Liquidity.Utils.get_amounts_for_liquidity(2097, 83473499738992491211565015422, 75541653435528998045632568071, 83094576964003990165232822996)
+  iex> Uniswap.Liquidity.Math.amounts_for_liquidity(2097, 83473499738992491211565015422, 75541653435528998045632568071, 83094576964003990165232822996)
   {0, 199}
   """
-  @spec get_amounts_for_liquidity(
+  @spec amounts_for_liquidity(
           number,
           number,
           number,
           number
         ) :: {float, float}
-  def get_amounts_for_liquidity(
+  def amounts_for_liquidity(
         liquidity,
         current_sqrt_ratio,
         sqrt_ratio_a,
@@ -206,19 +204,19 @@ defmodule Uniswap.Liquidity.Utils do
 
     cond do
       current_sqrt_ratio <= lower_sqrt_ratio ->
-        {get_amount_0_for_liquidity(
+        {amount_0_for_liquidity(
            liquidity,
            lower_sqrt_ratio,
            upper_sqrt_ratio
          ), 0}
 
       current_sqrt_ratio < upper_sqrt_ratio ->
-        {get_amount_0_for_liquidity(
+        {amount_0_for_liquidity(
            liquidity,
            current_sqrt_ratio,
            upper_sqrt_ratio
          ),
-         get_amount_1_for_liquidity(
+         amount_1_for_liquidity(
            liquidity,
            lower_sqrt_ratio,
            current_sqrt_ratio
@@ -227,7 +225,7 @@ defmodule Uniswap.Liquidity.Utils do
       true ->
         # current_sqrt_ratio >= upper_sqrt_ratio
         {0,
-         get_amount_1_for_liquidity(
+         amount_1_for_liquidity(
            liquidity,
            lower_sqrt_ratio,
            upper_sqrt_ratio
@@ -243,13 +241,13 @@ defmodule Uniswap.Liquidity.Utils do
 
   ## Examples
 
-  iex> Uniswap.Liquidity.Utils.get_required_swap_for_liquidity(100, 200, 112045541949572287496682733568, 79228162514264337593543950336, 137227202865029789651872776192)
+  iex> Uniswap.Liquidity.Math.required_swap_for_liquidity(100, 200, 112045541949572287496682733568, 79228162514264337593543950336, 137227202865029789651872776192)
   22
 
-  iex> Uniswap.Liquidity.Utils.get_required_swap_for_liquidity(50, 200, 112045541949572287496682733568, 79228162514264337593543950336, 137227202865029789651872776192)
+  iex> Uniswap.Liquidity.Math.required_swap_for_liquidity(50, 200, 112045541949572287496682733568, 79228162514264337593543950336, 137227202865029789651872776192)
   -14
   """
-  def get_required_swap_for_liquidity(
+  def required_swap_for_liquidity(
         amount_0,
         amount_1,
         current_sqrt_ratio,
@@ -257,7 +255,7 @@ defmodule Uniswap.Liquidity.Utils do
         sqrt_ratio_b
       ) do
     {r0, r1} =
-      get_amounts_for_liquidity(1_000_000_000, current_sqrt_ratio, sqrt_ratio_a, sqrt_ratio_b)
+      amounts_for_liquidity(1_000_000_000, current_sqrt_ratio, sqrt_ratio_a, sqrt_ratio_b)
 
     amount =
       div(

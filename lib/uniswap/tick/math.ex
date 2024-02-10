@@ -16,7 +16,7 @@ defmodule Uniswap.Tick.Math do
   @doc """
   Calculates sqrt(1.0001^tick) * 2^96
   """
-  def get_sqrt_ratio_at_tick(tick) do
+  def sqrt_ratio_at_tick(tick) do
     abs_tick = abs(tick)
 
     if abs_tick <= @max_tick do
@@ -61,20 +61,20 @@ defmodule Uniswap.Tick.Math do
     end
   end
 
-  @doc "Same as `get_sqrt_ratio_at_tick/1` but raises on errors"
-  def get_sqrt_ratio_at_tick!(tick) do
-    case get_sqrt_ratio_at_tick(tick) do
+  @doc "Same as `sqrt_ratio_at_tick/1` but raises on errors"
+  def sqrt_ratio_at_tick!(tick) do
+    case sqrt_ratio_at_tick(tick) do
       {:ok, sqrt_price_x96} -> sqrt_price_x96
       {:error, :invalid_tick} -> raise ArgumentError, "Invalid Tick"
     end
   end
 
   @doc """
-  Calculates reverse of `get_sqrt_ratio_at_tick/1`.
+  Calculates reverse of `sqrt_ratio_at_tick/1`.
 
   *IMPORTANT*: This function is not precision safe and is using floating point calculation. Do not use in prod!
   """
-  def get_tick_at_sqrt_ratio(sqrt_ratio) do
+  def tick_at_sqrt_ratio(sqrt_ratio) do
     if sqrt_ratio >= @min_sqrt_ratio and sqrt_ratio <= @max_sqrt_ratio do
       ratio = (sqrt_ratio / 2 ** 96) ** 2
       tick = :math.log(ratio) / :math.log(@tick_base)
@@ -85,9 +85,9 @@ defmodule Uniswap.Tick.Math do
     end
   end
 
-  @doc "Same as `get_tick_at_sqrt_ratio/1` but raises on errors"
-  def get_tick_at_sqrt_ratio!(tick) do
-    case get_tick_at_sqrt_ratio(tick) do
+  @doc "Same as `tick_at_sqrt_ratio/1` but raises on errors"
+  def tick_at_sqrt_ratio!(tick) do
+    case tick_at_sqrt_ratio(tick) do
       {:ok, sqrt_price_x96} -> sqrt_price_x96
       {:error, :invalid_sqrt_ratio} -> raise ArgumentError, "Invalid Ratio"
     end
