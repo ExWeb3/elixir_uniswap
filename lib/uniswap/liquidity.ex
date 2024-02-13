@@ -1,4 +1,7 @@
 defmodule Uniswap.Liquidity do
+  @moduledoc """
+  Manage Liquidity on Uniswap contracts
+  """
   alias Uniswap.Contracts.NonfungiblePositionManager
   alias Uniswap.Liquidity.Position
 

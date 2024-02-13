@@ -137,7 +137,7 @@ defmodule Uniswap.Liquidity.Math do
   99
   """
   @spec amount_0_for_liquidity(number, number, number) ::
-          float
+          non_neg_integer()
   def amount_0_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
     {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
@@ -159,7 +159,7 @@ defmodule Uniswap.Liquidity.Math do
   199
   """
   @spec amount_1_for_liquidity(number, number, number) ::
-          float
+          non_neg_integer()
   def amount_1_for_liquidity(liquidity, sqrt_ratio_a, sqrt_ratio_b) do
     {lower_sqrt_ratio, upper_sqrt_ratio} = sort_prices(sqrt_ratio_a, sqrt_ratio_b)
 
@@ -193,7 +193,7 @@ defmodule Uniswap.Liquidity.Math do
           number,
           number,
           number
-        ) :: {float, float}
+        ) :: {non_neg_integer(), non_neg_integer()}
   def amounts_for_liquidity(
         liquidity,
         current_sqrt_ratio,
