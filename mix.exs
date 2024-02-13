@@ -40,7 +40,8 @@ defmodule Uniswap.MixProject do
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
       maintainers: ["Alisina Bahadori"],
-      files: ["lib", "priv", "mix.exs", "README*", "LICENSE*", "CHANGELOG*"]
+      files: ["lib", "priv", "mix.exs", "README*", "LICENSE*", "CHANGELOG*"],
+      exclude_patterns: ["priv/node_modules"]
     ]
   end
 
