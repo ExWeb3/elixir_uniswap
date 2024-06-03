@@ -84,7 +84,7 @@ defmodule Uniswap.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:decimal, "~> 2.1", only: :test},
       {:dialyxir, "~> 1.3", only: [:dev, :test], runtime: false},
-      {:ethers, "~> 0.3.0 or ~> 0.2.0 or ~> 0.4.3"},
+      {:ethers, "~> 0.3.0 or ~> 0.2.0 or ~> 0.4.3 or ~> 0.5.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test}
     ]
