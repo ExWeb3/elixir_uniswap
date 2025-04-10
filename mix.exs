@@ -1,7 +1,7 @@
 defmodule Uniswap.MixProject do
   use Mix.Project
 
-  @version "0.0.2-dev"
+  @version "0.0.3"
   @source_url "https://github.com/alisinabh/elixir_uniswap"
 
   def project do
@@ -20,8 +20,7 @@ defmodule Uniswap.MixProject do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
-      description:
-        "A comprehensive Web3 library for interacting with smart contracts on Ethereum using Elixir.",
+      description: "Uniswap client library for Elixir",
       package: package(),
       docs: docs(),
       dialyzer: dialyzer()
@@ -84,7 +83,7 @@ defmodule Uniswap.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:decimal, "~> 2.1", only: :test},
       {:dialyxir, "~> 1.3", only: [:dev, :test], runtime: false},
-      {:ethers, "~> 0.3.0 or ~> 0.2.0 or ~> 0.4.3 or ~> 0.5.0"},
+      {:ethers, "~> 0.3"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test}
     ]
