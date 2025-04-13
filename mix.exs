@@ -1,7 +1,7 @@
 defmodule Uniswap.MixProject do
   use Mix.Project
 
-  @version "0.0.3"
+  @version "0.0.4"
   @source_url "https://github.com/alisinabh/elixir_uniswap"
 
   def project do
