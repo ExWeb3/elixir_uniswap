@@ -5,7 +5,8 @@ defmodule Uniswap.Tick.Math do
 
   import Bitwise
 
-  @max_tick 887_272
+  @min_tick -887_272
+  @max_tick -@min_tick
   @min_sqrt_ratio 4_295_128_739
   @max_sqrt_ratio 1_461_446_703_485_210_103_287_273_052_203_988_822_378_723_970_342
 
@@ -119,8 +120,11 @@ defmodule Uniswap.Tick.Math do
       iex> Uniswap.Tick.Math.prev_valid_tick(22, 8)
       16
 
-      iex> Uniswap.Tick.Math.prev_valid_tick(-8388608, 10)
-      -8388600
+      iex> Uniswap.Tick.Math.prev_valid_tick(-887_272, 10)
+      -887_270
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(-887_270, 10)
+      -887_270
   """
   def prev_valid_tick(tick, tick_spacing) do
     r = rem(tick, tick_spacing)
@@ -132,7 +136,7 @@ defmodule Uniswap.Tick.Math do
         true -> tick
       end
 
-    if new_tick < Ethers.Types.min({:int, 24}) do
+    if new_tick < @min_tick do
       next_valid_tick(tick, tick_spacing)
     else
       new_tick
@@ -165,8 +169,8 @@ defmodule Uniswap.Tick.Math do
       iex> Uniswap.Tick.Math.next_valid_tick(22, 8)
       24
 
-      iex> Uniswap.Tick.Math.next_valid_tick(8388607, 10)
-      8388600
+      iex> Uniswap.Tick.Math.next_valid_tick(887_272, 10)
+      887_270
   """
   def next_valid_tick(tick, tick_spacing) do
     r = rem(tick, tick_spacing)
@@ -178,7 +182,7 @@ defmodule Uniswap.Tick.Math do
         true -> tick
       end
 
-    if new_tick > Ethers.Types.max({:int, 24}) do
+    if new_tick > @max_tick do
       prev_valid_tick(tick, tick_spacing)
     else
       new_tick
