@@ -118,14 +118,24 @@ defmodule Uniswap.Tick.Math do
 
       iex> Uniswap.Tick.Math.prev_valid_tick(22, 8)
       16
+
+      iex> Uniswap.Tick.Math.prev_valid_tick(-8388608, 10)
+      -8388600
   """
   def prev_valid_tick(tick, tick_spacing) do
     r = rem(tick, tick_spacing)
 
-    cond do
-      r > 0 -> tick - r
-      r < 0 -> tick - (tick_spacing + r)
-      true -> tick
+    new_tick =
+      cond do
+        r > 0 -> tick - r
+        r < 0 -> tick - (tick_spacing + r)
+        true -> tick
+      end
+
+    if new_tick < Ethers.Types.min({:int, 24}) do
+      next_valid_tick(tick, tick_spacing)
+    else
+      new_tick
     end
   end
 
@@ -154,14 +164,24 @@ defmodule Uniswap.Tick.Math do
 
       iex> Uniswap.Tick.Math.next_valid_tick(22, 8)
       24
+
+      iex> Uniswap.Tick.Math.next_valid_tick(8388607, 10)
+      8388600
   """
   def next_valid_tick(tick, tick_spacing) do
     r = rem(tick, tick_spacing)
 
-    cond do
-      r > 0 -> tick + (tick_spacing - r)
-      r < 0 -> tick - r
-      true -> tick
+    new_tick =
+      cond do
+        r > 0 -> tick + (tick_spacing - r)
+        r < 0 -> tick - r
+        true -> tick
+      end
+
+    if new_tick > Ethers.Types.max({:int, 24}) do
+      prev_valid_tick(tick, tick_spacing)
+    else
+      new_tick
     end
   end
 
